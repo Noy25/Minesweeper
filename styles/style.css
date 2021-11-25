@@ -1,0 +1,67 @@
+body {
+    background-color: black;
+    background-image: url('../images/city\ night.jpeg');
+    background-size: cover;
+    background-repeat: no-repeat;
+    height: 95vh;
+    width: 99vw;
+    color: white;
+    text-align: center;
+    font-size: 1.3rem;
+}
+
+.beginner-btn, .hard-btn, .expert-btn {
+    margin-right: 10px;
+    height: 80px;
+    width: 120px;
+    border-radius: 10px;
+    line-height: 20px;
+}
+
+.board-container {
+    margin: auto;
+    margin-top: 20px;
+}
+
+.restart-btn {
+    display: block;
+    margin: auto;
+    margin-top: 25px;
+}
+
+table {
+    margin: auto;
+    border-spacing: 6px;
+}
+
+td {
+    height: 40px;
+    width: 40px;
+    background-color: #fff;
+    color: black;
+    border-radius: 5px;
+    border: 1px solid black;
+}
+
+button:hover, td:hover {
+    cursor: pointer;
+    opacity: 0.7;
+}
+
+.hidden {
+    color: rgba(0, 0, 0, 0);
+}
+
+.shown {
+    background-color: rgba(255, 255, 255, .4);
+}
+
+.restart-btn {
+    margin: auto;
+    height: 20px;
+    width: 20px;
+}
+
+.restart-btn:hover {
+    cursor: default;
+}

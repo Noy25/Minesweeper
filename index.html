@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="styles/style.css">
+</head>
+
+
+<body onload="init()">
+
+    <h1>Minesweeper</h1>
+
+    <h2>Choose difficulty</h2>
+
+    <div>
+        <button class="beginner-btn" onclick="changeLevel(4, 2, 2)">Beginner 4x4<br>2 Mines<br>2 Lives</button>
+        <button class="hard-btn" onclick="changeLevel(8, 12, 3)">Hard 8x8<br> 12 Mines<br>3 Lives</button>
+        <button class="expert-btn" onclick="changeLevel(12, 30, 3)">Expert 12x12<br> 30 Mines<br>3 Lives</button>
+    </div>
+
+    <h2 class="lives-left">Lives left : <span></span></h2>
+
+    <h2>Time : <span class="timer"></span></h2>
+
+    <div class="restart-btn" onclick="init()">🙂</div>
+
+    <div class="board-container">
+       
+    </div>
+
+    <script src="scripts/utils.js"></script>
+    <script src="scripts/main.js"></script>
+
+</body>
+
+</html>
