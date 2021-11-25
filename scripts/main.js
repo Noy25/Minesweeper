@@ -312,6 +312,7 @@ function expandShown(board, cellRowIdx, cellColIdx) {
                 var elCell = document.querySelector(`.${className}`);
                 elCell.classList.remove('hidden');
                 elCell.classList.add('shown');
+                if (!negCell.minesAroundCount) expandShown(board, i, j);
             }
         }
     }
