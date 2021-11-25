@@ -8,6 +8,29 @@ body {
     color: white;
     text-align: center;
     font-size: 1.3rem;
+    font-family:Verdana, Geneva, Tahoma, sans-serif;
+}
+
+h1 {
+    height: 50px;
+    margin: 0 auto;
+}
+
+.choose-diff {
+    margin: 15px auto;
+    font-size: 1.5rem;
+}
+
+.beginner-btn {
+    background-color: rgba(34, 240, 34, 0.7);
+}
+
+.hard-btn {
+    background-color: rgba(235, 146, 30, 0.7);
+}
+
+.expert-btn {
+    background-color: rgba(226, 18, 18, 0.7);
 }
 
 .beginner-btn, .hard-btn, .expert-btn {
@@ -16,11 +39,30 @@ body {
     width: 120px;
     border-radius: 10px;
     line-height: 20px;
+    font-weight: bold;
+    border: none;
+}
+
+.lives-left span {
+    color: rgba(255, 32, 32, 0.9)
+}
+
+.hints-left span {
+    color: rgba(255, 240, 32, 0.9)
+}
+
+.lives-left, .hints-left, .time-left {
+    margin: 10px auto;
+    font-size:  1.5rem;
+}
+
+.hints-left span:hover {
+    cursor: pointer;
 }
 
 .board-container {
     margin: auto;
-    margin-top: 20px;
+    margin-top: 10px;
 }
 
 .restart-btn {
@@ -31,16 +73,16 @@ body {
 
 table {
     margin: auto;
-    border-spacing: 6px;
+    border-spacing: 4px;
 }
 
 td {
-    height: 40px;
-    width: 40px;
-    background-color: #fff;
+    height: 35px;
+    width: 35px;
+    background-color: rgba(255, 255, 255, .9);
     color: black;
     border-radius: 5px;
-    border: 1px solid black;
+    border: 0.5px solid black;
 }
 
 button:hover, td:hover {
@@ -53,7 +95,7 @@ button:hover, td:hover {
 }
 
 .shown {
-    background-color: rgba(255, 255, 255, .4);
+    background-color: rgba(255, 255, 255, .6);
 }
 
 .restart-btn {

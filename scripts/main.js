@@ -25,7 +25,9 @@ var gGame = {
     shownCount: 0,
     markedCount: 0,
     secsPassed: 0,
-    livesCount: 2
+    livesCount: 2,
+    hintState: false,
+    hintsCount: 3
 }
 
 
@@ -34,6 +36,7 @@ function init() {
     gBoard = buildBoard(gLevel.SIZE);
     renderBoard();
     updateLives();
+    updateHints();
 }
 
 
@@ -56,8 +59,73 @@ function resetGame() {
     gGame.markedCount = 0;
     gGame.secsPassed = 0;
     gGame.livesCount = gLevel.LIVES;
+    gGame.hintState = false;
+    gGame.hintsCount = 3;
     resetTimer();
     document.querySelector('.restart-btn').innerText = '🙂';
+}
+
+
+// Updates the DOM
+function updateHints() {
+    var strTEXT = '';
+    var elHintsSpan = document.querySelector('.hints-left span');
+
+    if (gGame.hintsCount) {
+        for (var i = 0; i < gGame.hintsCount; i++) {
+            strTEXT += '💡';
+            elHintsSpan.innerText = strTEXT;
+        }
+    } else elHintsSpan.innerText = '';
+
+}
+
+
+// Expands all neighbor cells on a click for a few seconds (only when gGame.hintState is true).
+function expandShownHint(board, cellRowIdx, cellColIdx) {
+    if (!gGame.isOn) return;
+    var shownCells = [];
+    var shownCellPos = null;
+
+    for (var i = cellRowIdx - 1; i <= cellRowIdx + 1; i++) {
+        if (i < 0 || i > board.length - 1) continue;
+        for (var j = cellColIdx - 1; j <= cellColIdx + 1; j++) {
+            if (j < 0 || j > board[i].length - 1) continue;
+            var negCell = board[i][j];
+            if (!negCell.isShown) {
+                shownCellPos = { i, j };
+                shownCells.push(shownCellPos);
+                // Update the DOM :
+                var className = getClassName({ i, j });
+                var elCell = document.querySelector(`.${className}`);
+                elCell.classList.remove('hidden');
+                elCell.classList.add('shown');
+            }
+        }
+    }
+    gGame.hintState = false;
+    gGame.isOver = true;
+    setTimeout(() => {
+        for (var k = 0; k < shownCells.length; k++) {
+            var currCellPos = shownCells[k];
+            className = getClassName(currCellPos);
+            elCell = document.querySelector(`.${className}`);
+            elCell.classList.remove('shown');
+            elCell.classList.add('hidden');
+            gGame.isOver = false;
+        }
+    }, 1000);
+}
+
+
+// Turns the 'hint state' on, so the next click on a cell will let expandShownHint function run.
+function turnHintStateOn() {
+    if (!gGame.isOn) return;
+    if (gGame.isOver) return;
+    if (!gGame.hintsCount) return;
+    gGame.hintState = true;
+    gGame.hintsCount--;
+    updateHints();
 }
 
 
@@ -69,7 +137,7 @@ function updateLives() {
     if (gGame.livesCount) {
         for (var i = 0; i < gGame.livesCount; i++) {
             strTEXT += '💘';
-            elLivesSpan.innerText = strTEXT
+            elLivesSpan.innerText = strTEXT;
         }
     } else elLivesSpan.innerText = '';
 
@@ -89,17 +157,19 @@ function checkGameOver() {
         elRestartBtn.innerText = '🤯'
         // Stop the Timer :
         clearInterval(gTimerId);
+        console.log('gGame', gGame);
         return;
     }
 
     // Win :
-    if ((gGame.markedCount === gLevel.MINES) && (gGame.shownCount === (Math.pow(gLevel.SIZE, 2) - gLevel.MINES))) {
+    if ((gGame.markedCount === gLevel.MINES) && (gGame.shownCount >= (Math.pow(gLevel.SIZE, 2) - gLevel.MINES))) {
         // Update the Model :
         gGame.isOver = true;
         // Update the DOM :
         elRestartBtn.innerText = '😎'
         // Stop the Timer :
         clearInterval(gTimerId);
+        console.log('gGame', gGame);
         return;
     }
 }
@@ -110,12 +180,13 @@ function showMines() {
     for (var i = 0; i < gBoard.length; i++) {
         for (var j = 0; j < gBoard.length; j++) {
             var currCell = gBoard[i][j];
-            if (currCell.isMine) {
+            if (currCell.isMine || (currCell.isMine && currCell.isMarked)) {
                 // Update the Model :
                 currCell.isShown = true;
                 // Update the DOM :
                 var className = getClassName({ i, j });
                 var elCell = document.querySelector(`.${className}`);
+                elCell.innerHTML = MINE;
                 elCell.classList.remove('hidden');
                 elCell.classList.add('shown');
             }
@@ -128,6 +199,7 @@ function showMines() {
 function cellRightClicked(ev, elCell, cellI, cellJ) {
     ev.preventDefault();
     if (gGame.isOver) return;
+    if (gGame.hintState) return;
     var currCell = gBoard[cellI][cellJ];
     if (!gGame.isOn) return;
     if (currCell.isShown) return;
@@ -142,14 +214,14 @@ function markUnmarkCell(elCell, cellI, cellJ) {
     if (!gBoard[cellI][cellJ].isMarked) {
         // Update the Model :
         gBoard[cellI][cellJ].isMarked = true;
-        gGame.markedCount++;
+        if (gBoard[cellI][cellJ].isMine) gGame.markedCount++;
         // Update the DOM :
         elCell.innerHTML = FLAG;
         elCell.classList.remove('hidden');
     } else {
         // Update the Model :
         gBoard[cellI][cellJ].isMarked = false;
-        gGame.markedCount--;
+        if (gBoard[cellI][cellJ].isMine) gGame.markedCount--;
         // Update the DOM :
         if (gBoard[cellI][cellJ].isMine) {
             elCell.innerHTML = MINE;
@@ -167,10 +239,14 @@ function markUnmarkCell(elCell, cellI, cellJ) {
 function cellClicked(elCell, cellI, cellJ) {
     if (gGame.isOver) return;
 
-    var currCell = gBoard[cellI][cellJ];
-
     // Initiate game
+    var currCell = gBoard[cellI][cellJ];
     if (!gGame.isOn && !currCell.isMarked) gameOn(cellI, cellJ);
+    
+    if (gGame.hintState) {
+        expandShownHint(gBoard, cellI, cellJ);
+        return
+    }
 
     // Show cells
     if (!gBoard[cellI][cellJ].isShown && !gBoard[cellI][cellJ].isMarked) {

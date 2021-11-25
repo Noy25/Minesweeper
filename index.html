@@ -14,7 +14,7 @@
 
     <h1>Minesweeper</h1>
 
-    <h2>Choose difficulty</h2>
+    <h2 class="choose-diff">Choose difficulty</h2>
 
     <div>
         <button class="beginner-btn" onclick="changeLevel(4, 2, 2)">Beginner 4x4<br>2 Mines<br>2 Lives</button>
@@ -23,16 +23,17 @@
     </div>
 
     <h2 class="lives-left">Lives left : <span></span></h2>
+    
+    <h2 class="hints-left">Hints left (click to activate) : <span onclick="turnHintStateOn()"></span></h2> 
 
-    <h2>Time : <span class="timer"></span></h2>
+    <h2 class="time-left">Time : <span class="timer"></span></h2>
 
-    <div class="restart-btn" onclick="init()">🙂</div>
+    <div class="restart-btn" style="cursor: pointer" onclick="init()">🙂</div>
 
     <div class="board-container">
        
     </div>
 
-    <script src="scripts/utils.js"></script>
     <script src="scripts/main.js"></script>
 
 </body>
