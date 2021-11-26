@@ -24,6 +24,7 @@ var gGame = {
     isOver: false,
     shownCount: 0,
     markedCount: 0,
+    minesMarkedCount: 0,
     secsPassed: 0,
     livesCount: 2,
     hintState: false,
@@ -37,6 +38,7 @@ function init() {
     renderBoard();
     updateLives();
     updateHints();
+    updateMines();
 }
 
 
@@ -57,6 +59,7 @@ function resetGame() {
     gGame.isOver = false;
     gGame.shownCount = 0;
     gGame.markedCount = 0;
+    gGame.minesMarkedCount = 0;
     gGame.secsPassed = 0;
     gGame.livesCount = gLevel.LIVES;
     gGame.hintState = false;
@@ -66,7 +69,15 @@ function resetGame() {
 }
 
 
-// Updates the DOM
+// Checks how many mines are left and updates DOM accordingly.
+function updateMines() {
+    var minesLeft = gLevel.MINES - gGame.markedCount;
+    var elMinesSpan = document.querySelector('.mines-left span');
+    elMinesSpan.innerText = minesLeft;
+}
+
+
+// Checks how many hints are left for the user and updates DOM accordingly.
 function updateHints() {
     var strTEXT = '';
     var elHintsSpan = document.querySelector('.hints-left span');
@@ -77,6 +88,21 @@ function updateHints() {
             elHintsSpan.innerText = strTEXT;
         }
     } else elHintsSpan.innerText = '';
+
+}
+
+
+// Checks how many lives are left for the user and updates DOM accordingly.
+function updateLives() {
+    var strTEXT = '';
+    var elLivesSpan = document.querySelector('.lives-left span');
+
+    if (gGame.livesCount) {
+        for (var i = 0; i < gGame.livesCount; i++) {
+            strTEXT += '💘';
+            elLivesSpan.innerText = strTEXT;
+        }
+    } else elLivesSpan.innerText = '';
 
 }
 
@@ -129,21 +155,6 @@ function turnHintStateOn() {
 }
 
 
-// Checks how many lives are left for the user and updates DOM accordingly.
-function updateLives() {
-    var strTEXT = '';
-    var elLivesSpan = document.querySelector('.lives-left span');
-
-    if (gGame.livesCount) {
-        for (var i = 0; i < gGame.livesCount; i++) {
-            strTEXT += '💘';
-            elLivesSpan.innerText = strTEXT;
-        }
-    } else elLivesSpan.innerText = '';
-
-}
-
-
 // Checks the conditions for finishing the game (both win or loss situations).
 function checkGameOver() {
     var elRestartBtn = document.querySelector('.restart-btn');
@@ -162,7 +173,8 @@ function checkGameOver() {
     }
 
     // Win :
-    if ((gGame.markedCount === gLevel.MINES) && (gGame.shownCount >= (Math.pow(gLevel.SIZE, 2) - gLevel.MINES))) {
+    // if ((gGame.minesMarkedCount === gLevel.MINES) && (gGame.shownCount >= (Math.pow(gLevel.SIZE, 2) - gLevel.MINES))) {
+    if ((gGame.minesMarkedCount + gGame.shownCount) === Math.pow(gLevel.SIZE, 2)) {
         // Update the Model :
         gGame.isOver = true;
         // Update the DOM :
@@ -203,6 +215,7 @@ function cellRightClicked(ev, elCell, cellI, cellJ) {
     var currCell = gBoard[cellI][cellJ];
     if (!gGame.isOn) return;
     if (currCell.isShown) return;
+    // if (gGame.markedCount === gLevel.MINES) return;
     markUnmarkCell(elCell, cellI, cellJ);
     checkGameOver();
 }
@@ -211,17 +224,20 @@ function cellRightClicked(ev, elCell, cellI, cellJ) {
 // Marks or Unmarks a cell.
 function markUnmarkCell(elCell, cellI, cellJ) {
 
-    if (!gBoard[cellI][cellJ].isMarked) {
+    if (!gBoard[cellI][cellJ].isMarked && gGame.markedCount !== gLevel.MINES) {
         // Update the Model :
         gBoard[cellI][cellJ].isMarked = true;
-        if (gBoard[cellI][cellJ].isMine) gGame.markedCount++;
+        gGame.markedCount++
+        if (gBoard[cellI][cellJ].isMine) gGame.minesMarkedCount++;
         // Update the DOM :
         elCell.innerHTML = FLAG;
         elCell.classList.remove('hidden');
-    } else {
+        updateMines();
+    } else if (gBoard[cellI][cellJ].isMarked) {
         // Update the Model :
         gBoard[cellI][cellJ].isMarked = false;
-        if (gBoard[cellI][cellJ].isMine) gGame.markedCount--;
+        gGame.markedCount--
+        if (gBoard[cellI][cellJ].isMine) gGame.minesMarkedCount--;
         // Update the DOM :
         if (gBoard[cellI][cellJ].isMine) {
             elCell.innerHTML = MINE;
@@ -231,7 +247,8 @@ function markUnmarkCell(elCell, cellI, cellJ) {
             elCell.innerHTML = EMPTY;
         }
         elCell.classList.add('hidden');
-    }
+        updateMines();
+    } else return;
 }
 
 
@@ -259,10 +276,13 @@ function cellClicked(elCell, cellI, cellJ) {
 
         if (currCell.isMine) {
             // Update the Model:
-            gGame.livesCount--
+            gGame.shownCount--;
+            gGame.livesCount--;
             currCell.isMarked = true;
             gGame.markedCount++;
+            gGame.minesMarkedCount++;
             updateLives();
+            updateMines();
             checkGameOver();
         }
 

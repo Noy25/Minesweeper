@@ -22,16 +22,17 @@
         <button class="expert-btn" onclick="changeLevel(12, 30, 3)">Expert 12x12<br> 30 Mines<br>3 Lives</button>
     </div>
 
-    <h2 class="lives-left">Lives left : <span></span></h2>
+    <div class="stats-container">
+        <h2 class="lives-left">Lives left : <span></span></h2>
+        <h2 class="hints-left">Hints left (click to activate) : <span class="hints-btn" onclick="turnHintStateOn()"></span></h2>
+        <h2 class="mines-left">Mines left : <span>0</span></h2>
+        <h2 class="time-left">Time : <span class="timer"></span></h2>
+    </div>
     
-    <h2 class="hints-left">Hints left (click to activate) : <span onclick="turnHintStateOn()"></span></h2> 
-
-    <h2 class="time-left">Time : <span class="timer"></span></h2>
-
     <div class="restart-btn" style="cursor: pointer" onclick="init()">🙂</div>
 
     <div class="board-container">
-       
+
     </div>
 
     <script src="scripts/main.js"></script>
