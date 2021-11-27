@@ -28,7 +28,9 @@ var gGame = {
     secsPassed: 0,
     livesCount: 2,
     hintState: false,
-    hintsCount: 3
+    hintsCount: 3,
+    safeMode: false,
+    safeCount: 3
 }
 
 
@@ -39,6 +41,7 @@ function init() {
     updateLives();
     updateHints();
     updateMines();
+    updateSafe();
 }
 
 
@@ -64,8 +67,17 @@ function resetGame() {
     gGame.livesCount = gLevel.LIVES;
     gGame.hintState = false;
     gGame.hintsCount = 3;
+    gGame.safeMode = false;
+    gGame.safeCount = 3;
     resetTimer();
     document.querySelector('.restart-btn').innerText = '🙂';
+}
+
+
+// Checks how many safe clicks are left for the user and updates DOM accordingly.
+function updateSafe() {
+    var elSafeSpan = document.querySelector('.safe-click span');
+    elSafeSpan.innerText = gGame.safeCount;
 }
 
 
@@ -107,6 +119,34 @@ function updateLives() {
 }
 
 
+// Shows the user a "safe" cell (non-mine cell) to click.
+function getSafeClick() {
+    var safeCell = getRandomEmptyCell(gBoard);
+    // Update the DOM :
+    var className = getClassName(safeCell);
+    var elSafe = document.querySelector(`.${className}`);
+    elSafe.classList.add('safe-cell');
+    
+    setTimeout(() => {
+        elSafe.classList.remove('safe-cell');
+        gGame.safeMode = false;
+    },1000);
+}
+
+
+// Turns the 'safe mode' on, so that the getSafeClick function will run and nothing else will be permitted during that period.
+function safeModeOn() {
+    if (!gGame.isOn) return;
+    if (gGame.isOver) return;
+    if (gGame.safeMode) return;
+    if (!gGame.safeCount) return;
+    gGame.safeMode = true;
+    gGame.safeCount--;
+    updateSafe();
+    getSafeClick();
+}
+
+
 // Expands all neighbor cells on a click for a few seconds (only when gGame.hintState is true).
 function expandShownHint(board, cellRowIdx, cellColIdx) {
     if (!gGame.isOn) return;
@@ -118,7 +158,7 @@ function expandShownHint(board, cellRowIdx, cellColIdx) {
         for (var j = cellColIdx - 1; j <= cellColIdx + 1; j++) {
             if (j < 0 || j > board[i].length - 1) continue;
             var negCell = board[i][j];
-            if (!negCell.isShown) {
+            if (!negCell.isShown && !negCell.isMarked) {
                 shownCellPos = { i, j };
                 shownCells.push(shownCellPos);
                 // Update the DOM :
@@ -145,9 +185,10 @@ function expandShownHint(board, cellRowIdx, cellColIdx) {
 
 
 // Turns the 'hint state' on, so the next click on a cell will let expandShownHint function run.
-function turnHintStateOn() {
+function hintStateOn() {
     if (!gGame.isOn) return;
     if (gGame.isOver) return;
+    if (gGame.hintState) return;
     if (!gGame.hintsCount) return;
     gGame.hintState = true;
     gGame.hintsCount--;
@@ -322,7 +363,7 @@ function expandShown(board, cellRowIdx, cellColIdx) {
             if (j < 0 || j > board[i].length - 1) continue;
             if (i === cellRowIdx && j === cellColIdx) continue;
             var negCell = board[i][j];
-            if (negCell.isMine) continue;
+            if (negCell.isMine || negCell.isMarked) continue;
             // Update the Model :
             if (!negCell.isShown) {
                 negCell.isShown = true;
@@ -453,6 +494,7 @@ function getRandomEmptyCell(board, cellI, cellJ) {
         for (var j = 0; j < board[0].length; j++) {
             if (i === cellI && j === cellJ) continue;
             if (board[i][j].isMine) continue;
+            if (board[i][j].isShown) continue;
             var emptyCellPos = { i, j };
             emptyCells.push(emptyCellPos)
         }
