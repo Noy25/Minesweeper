@@ -139,6 +139,7 @@ function safeModeOn() {
     if (!gGame.isOn) return;
     if (gGame.isOver) return;
     if (gGame.safeMode) return;
+    if (gGame.hintState) return;
     if (!gGame.safeCount) return;
     gGame.safeMode = true;
     gGame.safeCount--;
@@ -189,6 +190,7 @@ function hintStateOn() {
     if (!gGame.isOn) return;
     if (gGame.isOver) return;
     if (gGame.hintState) return;
+    if (gGame.safeMode) return;
     if (!gGame.hintsCount) return;
     gGame.hintState = true;
     gGame.hintsCount--;
@@ -209,7 +211,6 @@ function checkGameOver() {
         elRestartBtn.innerText = '🤯'
         // Stop the Timer :
         clearInterval(gTimerId);
-        console.log('gGame', gGame);
         return;
     }
 
